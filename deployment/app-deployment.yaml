@@ -16,8 +16,10 @@ spec:
     spec:
       containers:
       - name: analytics-api
-        image: 412283035460.dkr.ecr.us-east-1.amazonaws.com/udacity-project-3-ecr:0.0.2
+        image: 412283035460.dkr.ecr.us-east-1.amazonaws.com/udacity-project-3-ecr:0.0.3
         imagePullPolicy: Always
+        ports:
+          - containerPort: 5151
         livenessProbe:
           httpGet:
             path: /health_check
@@ -31,7 +33,8 @@ spec:
           initialDelaySeconds: 5
           timeoutSeconds: 5
         envFrom:
-            - secretRef:
-                name: env-secret
-            - configMapRef:
-                name: env-configmap
+          - secretRef:
+              name: env-secret
+          - configMapRef:
+              name: env-configmap
+      restartPolicy: Always
