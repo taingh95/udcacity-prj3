@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,26 +16,37 @@ spec:
         service: analytics-api
     spec:
       containers:
-      - name: analytics-api
-        image: 412283035460.dkr.ecr.us-east-1.amazonaws.com/udacity-project-3-ecr:0.0.3
-        imagePullPolicy: Always
-        ports:
-          - containerPort: 5151
-        livenessProbe:
-          httpGet:
-            path: /health_check
-            port: 5151
-          initialDelaySeconds: 5
-          timeoutSeconds: 2
-        readinessProbe:
-          httpGet:
-            path: "/readiness_check"
-            port: 5151
-          initialDelaySeconds: 5
-          timeoutSeconds: 5
-        envFrom:
-          - secretRef:
-              name: env-secret
-          - configMapRef:
-              name: env-configmap
+        - name: analytics-api
+          image: 412283035460.dkr.ecr.us-east-1.amazonaws.com/udacity-project-3-ecr:0.0.4
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5151
+          livenessProbe:
+            httpGet:
+              path: /health_check
+              port: 5151
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /readiness_check
+              port: 5151
+            initialDelaySeconds: 5
+            timeoutSeconds: 5
+          env:
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: env-secret
+                  key: DB_PASSWORD
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: env-configmap
+                  key: DB_HOST
       restartPolicy: Always
