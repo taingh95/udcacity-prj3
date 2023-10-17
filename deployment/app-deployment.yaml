@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-api
+  labels:
+    name: analytics-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: analytics-api
+  template:
+    metadata:
+      labels:
+        service: analytics-api
+    spec:
+      containers:
+      - name: analytics-api
+        image: 412283035460.dkr.ecr.us-east-1.amazonaws.com/udacity-project-3-ecr:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /health_check
+            port: 5151
+          initialDelaySeconds: 5
+          timeoutSeconds: 2
+        readinessProbe:
+          httpGet:
+            path: "/readiness_check"
+            port: 5151
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        envFrom:
+            - secretRef:
+                name: env-secret
+            - configMapRef:
+                name: env-configmap
+      restartPolicy: Always
