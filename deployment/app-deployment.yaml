@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: analytics-api
-        image: 412283035460.dkr.ecr.us-east-1.amazonaws.com/udacity-project-3-ecr:latest
+        image: 412283035460.dkr.ecr.us-east-1.amazonaws.com/udacity-project-3-ecr:0.0.2
         imagePullPolicy: Always
         livenessProbe:
           httpGet:

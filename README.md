@@ -53,12 +53,6 @@ kubectl port-forward --namespace default svc/app-db-postgresql 5432:5432 &
     PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432
 ```
 
-* Connecting Via a Pod
-```bash
-kubectl exec -it <POD_NAME> bash
-PGPASSWORD="<PASSWORD HERE>" psql postgres://postgres@<SERVICE_NAME>:5432/postgres -c <COMMAND_HERE>
-```
-
 4. Run Seed Files
 We will need to run the seed files in `db/` in order to create the tables and populate them with data.
 
