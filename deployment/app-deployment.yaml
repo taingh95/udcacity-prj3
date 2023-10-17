@@ -35,4 +35,3 @@ spec:
                 name: env-secret
             - configMapRef:
                 name: env-configmap
-      restartPolicy: Always
