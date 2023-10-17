@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,7 +7,7 @@ spec:
   selector:
     app.kubernetes.io/name: analytics-api
   ports:
-  - name: "5151"
-    protocol: TCP
-    port: 5151
-    targetPort: 5151
+    - name: "5151"
+      protocol: TCP
+      port: 5151
+      targetPort: 5151

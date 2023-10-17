@@ -1,8 +1,8 @@
 import os
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import jsonify, request, Flask
-from sqlalchemy import and_, text, SQLAlchemy
+from flask import jsonify
+from sqlalchemy import and_, text
 from random import randint
 from config import app, db
 from models import Token, User
