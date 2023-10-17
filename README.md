@@ -30,14 +30,14 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 
 2. Install PostgreSQL Helm Chart
 ```
-helm install db-service bitnami/postgresql --set primary.persistence.enabled=false
+helm install app-db bitnami/postgresql --set primary.persistence.existingClaim=postgres-pv-claim --set volumePermissions.enabled=true
 ```
 
-This should set up a Postgre deployment at `db-service-postgresql.default.svc.cluster.local` in your Kubernetes cluster. You can verify it by running `kubectl svc`
+This should set up a Postgre deployment at `app-db-postgresql.default.svc.cluster.local` in your Kubernetes cluster. You can verify it by running `kubectl svc`
 
 By default, it will create a username `postgres`. The password can be retrieved with the following command:
 ```bash
-export POSTGRES_PASSWORD=$(kubectl get secret --namespace default db-service-postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
+export POSTGRES_PASSWORD=$(kubectl get secret --namespace default app-db-postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
 
 echo $POSTGRES_PASSWORD
 ```
