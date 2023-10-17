@@ -71,39 +71,6 @@ kubectl port-forward --namespace default svc/app-db-postgresql 5432:5432 &
     PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432 < ./db/3_seed_tokens.sql
 ```
 
-### 2. Running the Analytics Application Locally
-In the `analytics/` directory:
-
-1. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-2. Run the application (see below regarding environment variables)
-```bash
-<ENV_VARS> python app.py
-```
-
-There are multiple ways to set environment variables in a command. They can be set per session by running `export KEY=VAL` in the command line or they can be prepended into your command.
-
-* `DB_USERNAME`
-* `DB_PASSWORD`
-* `DB_HOST` (defaults to `127.0.0.1`)
-* `DB_PORT` (defaults to `5432`)
-* `DB_NAME` (defaults to `postgres`)
-
-If we set the environment variables by prepending them, it would look like the following:
-```bash
-DB_USERNAME=$DB_USERNAME DB_PASSWORD=$DB_PASSWORD python app.py
-```
-The benefit here is that it's explicitly set. However, note that the `DB_PASSWORD` value is now recorded in the session's history in plaintext. There are several ways to work around this including setting environment variables in a file and sourcing them in a terminal session.
-
-3. Verifying The Application
-* Generate report for check-ins grouped by dates
-`curl <BASE_URL>/api/reports/daily_usage`
-
-* Generate report for check-ins grouped by users
-`curl <BASE_URL>/api/reports/user_visits`
-
 ## Project Instructions
 1. Set up a Postgres database with a Helm Chart
 2. Create a `Dockerfile` for the Python application. Use a base image that is Python-based.
@@ -113,7 +80,9 @@ The benefit here is that it's explicitly set. However, note that the `DB_PASSWOR
 
 ### Deliverables
 1. `Dockerfile`
+analytics\Dockerfile
 2. Screenshot of AWS CodeBuild pipeline
+![Alt text](screenshots/codebuild.png)
 3. Screenshot of AWS ECR repository for the application's repository
 ![Alt text](<screenshots/ECR repository.png>)
 4. Screenshot of `kubectl get svc`
