@@ -19,51 +19,39 @@ For this project, you are a DevOps engineer who will be collaborating with a tea
 4. AWS CloudWatch - monitor activity and logs in EKS
 5. GitHub - pull and clone code
 
-### Setup
-#### 1. Configure a Database
-Set up a Postgres database using a Helm Chart.
+### How deployment process works:
+1. AWS CodeBuild will be triggered by push action of user to Github Repo.
+2. AWS CodeBuild Service conducts pre-build, build, and post-build actions to rebuild the image and publish it to AWS ECR Repository
+3. AWS EKS will use newly built image to deploy on application service
 
-1. Set up Bitnami Repo
-```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
-```
+### How the user can deploy changes:
+1. Modify and push changes of the application to the GitHub Repo
+2. Check the latest tag of deployed image from AWS ECR Repo
+3. Access into 'deployment' folder and modify the latest tag of image collect from step 2
+4. Check the status of new deployment with some kubectl commands
 
-2. Install PostgreSQL Helm Chart
-```
-helm install app-db bitnami/postgresql --set primary.persistence.existingClaim=postgres-pv-claim --set volumePermissions.enabled=true
-```
+### CloudWatch Metrics in EKS
+Kubernetes clusters created with EKS are set up to integrate with CloudWatch Container Insights by default.
 
-This should set up a Postgre deployment at `app-db-postgresql.default.svc.cluster.local` in your Kubernetes cluster. You can verify it by running `kubectl svc`
+This captures common sets of metrics such as CPU, memory, disk usage, and network traffic details. Additional data such as container diagnostic data is also captured.
 
-By default, it will create a username `postgres`. The password can be retrieved with the following command:
-```bash
-export POSTGRES_PASSWORD=$(kubectl get secret --namespace default app-db-postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
+Configuring CloudWatch Insights CloudWatch insights are easy to configure on your cluster.
 
-echo $POSTGRES_PASSWORD
-```
-
-<sup><sub>* The instructions are adapted from [Bitnami's PostgreSQL Helm Chart](https://artifacthub.io/packages/helm/bitnami/postgresql).</sub></sup>
-
-3. Test Database Connection
-The database is accessible within the cluster. This means that when you will have some issues connecting to it via your local environment. You can either connect to a pod that has access to the cluster _or_ connect remotely via [`Port Forwarding`](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/)
-
-* Connecting Via Port Forwarding
-```bash
-kubectl port-forward --namespace default svc/app-db-postgresql 5432:5432 &
-    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432
-```
-
-4. Run Seed Files
-We will need to run the seed files in `db/` in order to create the tables and populate them with data.
+1. Node Role Policy Your policy for your EKS node role should include CloudWatchAgentServerPolicy for the agent to properly forward metrics.
+2. Install CloudWatch Agent In the following command, replace <YOUR_CLUSTER_NAME_HERE> on line 1 with the name of your EKS cluster and replace <YOUR_AWS_REGION_HERE> on line 2 with your AWS region. Then, run the command on an environment that has kubectl configured.
 
 ```bash
-kubectl port-forward --namespace default svc/app-db-postgresql 5432:5432 &
-    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432 < ./db/1_create_tables.sql
-kubectl port-forward --namespace default svc/app-db-postgresql 5432:5432 &
-    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432 < ./db/2_seed_users.sql
-kubectl port-forward --namespace default svc/app-db-postgresql 5432:5432 &
-    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432 < ./db/3_seed_tokens.sql
+ClusterName=<YOUR_CLUSTER_NAME_HERE>
+RegionName=<YOUR_AWS_REGION_HERE>
+FluentBitHttpPort='2020'
+FluentBitReadFromHead='Off'
+[[ ${FluentBitReadFromHead} = 'On' ]] && FluentBitReadFromTail='Off'|| FluentBitReadFromTail='On'
+[[ -z ${FluentBitHttpPort} ]] && FluentBitHttpServer='Off' || FluentBitHttpServer='On'
+curl https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-insights/latest/k8s-deployment-manifest-templates/deployment-mode/daemonset/container-insights-monitoring/quickstart/cwagent-fluent-bit-quickstart.yaml | sed 's/{{cluster_name}}/'${ClusterName}'/;s/{{region_name}}/'${RegionName}'/;s/{{http_server_toggle}}/"'${FluentBitHttpServer}'"/;s/{{http_server_port}}/"'${FluentBitHttpPort}'"/;s/{{read_from_head}}/"'${FluentBitReadFromHead}'"/;s/{{read_from_tail}}/"'${FluentBitReadFromTail}'"/' | kubectl apply -f -
 ```
+This will install CloudWatch insights into the namespace amazon-cloudwatch on your cluster.
+
+After this is configured, you can navigate to CloudWatch in the AWS console to access CloudWatch Insights.
 
 ## Project Instructions
 1. Set up a Postgres database with a Helm Chart
